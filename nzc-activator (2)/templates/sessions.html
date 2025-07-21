@@ -24,11 +24,11 @@
                 <select id="type-filter"
                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     <option value="">All Types</option>
-                    <option value="Community Event">Community Event</option>
-                    <option value="Workshop">Workshop</option>
-                    <option value="Club Training">Club Training</option>
-                    <option value="School Visit">School Visit</option>
-                    <option value="Tournament">Tournament</option>
+                    <option value="School Festive Day">School Festive Day</option>
+                    <option value="Community Hub Practice">Community Hub Practice</option>
+                    <option value="Girl's Cricket Programme">Girl's Cricket Programme</option>
+                    <option value="Kiwi Cricket Skills Session">Kiwi Cricket Skills Session</option>
+                    <option value="In2Cricket Taster">In2Cricket Taster</option>
                 </select>
             </div>
         </div>
@@ -69,21 +69,50 @@
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">School Name *</label>
-                            <input type="text" id="edit-school-name" required
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">School/College Name *</label>
+                            <input type="text" id="edit-school-name" required list="edit-school-suggestions"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="Type or select a school/college">
+                            <datalist id="edit-school-suggestions">
+                                <option value="University of Auckland">
+                                <option value="University of Otago">
+                                <option value="University of Canterbury">
+                                <option value="Victoria University of Wellington">
+                                <option value="University of Waikato">
+                                <option value="Massey University">
+                                <option value="Lincoln University">
+                                <option value="Auckland University of Technology">
+                                <option value="Auckland Grammar School">
+                                <option value="Epsom Girls Grammar School">
+                                <option value="St Cuthbert's College">
+                                <option value="King's College">
+                                <option value="Mount Albert Grammar School">
+                                <option value="Wellington College">
+                                <option value="Wellington Girls' College">
+                                <option value="Scots College">
+                                <option value="Samuel Marsden Collegiate School">
+                                <option value="Christchurch Boys' High School">
+                                <option value="Christchurch Girls' High School">
+                                <option value="St Andrew's College">
+                                <option value="Rangi Ruru Girls' School">
+                                <option value="Otago Boys' High School">
+                                <option value="Otago Girls' High School">
+                                <option value="John McGlashan College">
+                            </datalist>
                         </div>
                         
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Session Type *</label>
-                            <select id="edit-session-type" required
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="Community Event">Community Event</option>
-                                <option value="Workshop">Workshop</option>
-                                <option value="Club Training">Club Training</option>
-                                <option value="School Visit">School Visit</option>
-                                <option value="Tournament">Tournament</option>
-                            </select>
+                            <input type="text" id="edit-session-type" required list="edit-session-type-suggestions"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="Type or select session type">
+                            <datalist id="edit-session-type-suggestions">
+                                <option value="School Festive Day">
+                                <option value="Community Hub Practice">
+                                <option value="Girl's Cricket Programme">
+                                <option value="Kiwi Cricket Skills Session">
+                                <option value="In2Cricket Taster">
+                            </datalist>
                         </div>
                     </div>
                     
@@ -106,7 +135,6 @@
                             <label class="block text-sm font-medium text-gray-700 mb-1">Year Group *</label>
                             <select id="edit-year-group" required
                                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="Year 1-2">Year 1-2</option>
                                 <option value="Year 3-4">Year 3-4</option>
                                 <option value="Year 5-6">Year 5-6</option>
                                 <option value="Year 7-8">Year 7-8</option>
@@ -134,6 +162,27 @@
                             <label class="block text-sm font-medium text-gray-700 mb-1">Female Participants *</label>
                             <input type="number" id="edit-female-participants" min="0" required
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Session Duration (minutes) *</label>
+                        <input type="number" id="edit-session-duration" min="0" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Latitude</label>
+                            <input type="number" id="edit-latitude" step="any"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="e.g., -36.8485">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Longitude</label>
+                            <input type="number" id="edit-longitude" step="any"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="e.g., 174.7633">
                         </div>
                     </div>
                     
@@ -233,6 +282,16 @@ function displaySessions() {
                         <i class="fas fa-clock mr-1"></i>
                         <strong>Recorded:</strong> ${new Date(session.date_created).toLocaleDateString()} ${new Date(session.date_created).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                     </div>
+                    <div>
+                        <i class="fas fa-hourglass-half mr-1"></i>
+                        <strong>Duration:</strong> ${session.session_duration ? session.session_duration + ' minutes' : 'N/A'}
+                    </div>
+                    ${session.latitude && session.longitude ? `
+                        <div>
+                            <i class="fas fa-globe mr-1"></i>
+                            <strong>Coords:</strong> ${session.latitude.toFixed(4)}, ${session.longitude.toFixed(4)}
+                        </div>
+                    ` : ''}
                 </div>
                 
                 <div class="flex flex-wrap gap-4 text-sm">
@@ -292,6 +351,9 @@ function editSession(id) {
         document.getElementById('edit-male-participants').value = session.male_participants;
         document.getElementById('edit-female-participants').value = session.female_participants;
         document.getElementById('edit-teacher-feedback').value = session.teacher_feedback || '';
+        document.getElementById('edit-session-duration').value = session.session_duration || '';
+        document.getElementById('edit-latitude').value = session.latitude || '';
+        document.getElementById('edit-longitude').value = session.longitude || '';
         
         document.getElementById('edit-modal').classList.remove('hidden');
     }
@@ -335,7 +397,10 @@ document.getElementById('edit-form').addEventListener('submit', async function(e
         session_date: document.getElementById('edit-session-date').value,
         male_participants: document.getElementById('edit-male-participants').value,
         female_participants: document.getElementById('edit-female-participants').value,
-        teacher_feedback: document.getElementById('edit-teacher-feedback').value
+        teacher_feedback: document.getElementById('edit-teacher-feedback').value,
+        session_duration: document.getElementById('edit-session-duration').value,
+        latitude: document.getElementById('edit-latitude').value,
+        longitude: document.getElementById('edit-longitude').value
     };
     
     try {
