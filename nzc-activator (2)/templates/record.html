@@ -10,22 +10,50 @@
         <form id="session-form" class="space-y-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label for="school_name" class="block text-sm font-medium text-gray-700 mb-2">School Name *</label>
-                    <input type="text" id="school_name" name="school_name" required
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <label for="school_name" class="block text-sm font-medium text-gray-700 mb-2">School/College Name *</label>
+                    <input type="text" id="school_name" name="school_name" required list="school-suggestions"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="Type or select a school/college">
+                    <datalist id="school-suggestions">
+                        <option value="University of Auckland">
+                        <option value="University of Otago">
+                        <option value="University of Canterbury">
+                        <option value="Victoria University of Wellington">
+                        <option value="University of Waikato">
+                        <option value="Massey University">
+                        <option value="Lincoln University">
+                        <option value="Auckland University of Technology">
+                        <option value="Auckland Grammar School">
+                        <option value="Epsom Girls Grammar School">
+                        <option value="St Cuthbert's College">
+                        <option value="King's College">
+                        <option value="Mount Albert Grammar School">
+                        <option value="Wellington College">
+                        <option value="Wellington Girls' College">
+                        <option value="Scots College">
+                        <option value="Samuel Marsden Collegiate School">
+                        <option value="Christchurch Boys' High School">
+                        <option value="Christchurch Girls' High School">
+                        <option value="St Andrew's College">
+                        <option value="Rangi Ruru Girls' School">
+                        <option value="Otago Boys' High School">
+                        <option value="Otago Girls' High School">
+                        <option value="John McGlashan College">
+                    </datalist>
                 </div>
                 
                 <div>
                     <label for="session_type" class="block text-sm font-medium text-gray-700 mb-2">Session Type *</label>
-                    <select id="session_type" name="session_type" required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="">Select session type</option>
-                        <option value="Community Event">Community Event</option>
-                        <option value="Workshop">Workshop</option>
-                        <option value="Club Training">Club Training</option>
-                        <option value="School Visit">School Visit</option>
-                        <option value="Tournament">Tournament</option>
-                    </select>
+                    <input type="text" id="session_type" name="session_type" required list="session-type-suggestions"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="Type or select session type">
+                    <datalist id="session-type-suggestions">
+                        <option value="School Festive Day">
+                        <option value="Community Hub Practice">
+                        <option value="Girl's Cricket Programme">
+                        <option value="Kiwi Cricket Skills Session">
+                        <option value="In2Cricket Taster">
+                    </datalist>
                 </div>
             </div>
             
@@ -78,6 +106,12 @@
                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 </div>
             </div>
+
+            <div>
+                <label for="session_duration" class="block text-sm font-medium text-gray-700 mb-2">Session Duration (minutes) *</label>
+                <input type="number" id="session_duration" name="session_duration" min="0" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
             
             <div>
                 <label for="teacher_feedback" class="block text-sm font-medium text-gray-700 mb-2">Teacher Feedback</label>
@@ -89,6 +123,20 @@
             <!-- Geolocation Section -->
             <div class="border-t pt-6">
                 <h3 class="text-lg font-medium text-gray-900 mb-4">Location Services</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="latitude" class="block text-sm font-medium text-gray-700 mb-2">Latitude</label>
+                        <input type="number" id="latitude" name="latitude" step="any"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="e.g., -36.8485">
+                    </div>
+                    <div>
+                        <label for="longitude" class="block text-sm font-medium text-gray-700 mb-2">Longitude</label>
+                        <input type="number" id="longitude" name="longitude" step="any"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="e.g., 174.7633">
+                    </div>
+                </div>
                 <button type="button" id="get-location" 
                         class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors">
                     <i class="fas fa-map-marker-alt mr-2"></i>
@@ -163,6 +211,8 @@ document.getElementById('session-form').addEventListener('submit', async functio
 // Geolocation
 document.getElementById('get-location').addEventListener('click', function() {
     const statusElement = document.getElementById('location-status');
+    const latitudeInput = document.getElementById('latitude');
+    const longitudeInput = document.getElementById('longitude');
     
     if (navigator.geolocation) {
         statusElement.textContent = 'Getting location...';
@@ -173,6 +223,8 @@ document.getElementById('get-location').addEventListener('click', function() {
                 const lng = position.coords.longitude;
                 statusElement.textContent = `Location captured: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
                 statusElement.className = 'text-sm text-green-600 mt-2';
+                latitudeInput.value = lat;
+                longitudeInput.value = lng;
             },
             function(error) {
                 statusElement.textContent = 'Unable to get location. Please check your browser settings.';
