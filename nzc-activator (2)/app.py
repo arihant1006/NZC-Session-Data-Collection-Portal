@@ -23,6 +23,7 @@ def init_db():
             female_participants INTEGER NOT NULL,
             teacher_feedback TEXT,
             session_date DATE NOT NULL,
+            session_duration INTEGER,
             date_created DATETIME DEFAULT CURRENT_TIMESTAMP,
             latitude REAL,
             longitude REAL,
@@ -34,16 +35,16 @@ def init_db():
     cursor.execute('SELECT COUNT(*) FROM sessions')
     if cursor.fetchone()[0] == 0:
         sample_sessions = [
-            ('Auckland Primary School', 'Community Event', 'School Hall', 'John Smith', 'Year 5-6', 8, 9, 'Great engagement from students', '2025-01-16', '2025-01-16 10:00:00'),
-            ('Wellington High School', 'Workshop', 'Gymnasium', 'Sarah Johnson', 'Year 7-8', 65, 62, 'Excellent participation', '2025-01-16', '2025-01-16 14:00:00'),
-            ('Christchurch College', 'Club Training', 'Sports Field', 'Mike Wilson', 'Year 9-10', 15, 13, 'Good skill development', '2025-01-16', '2025-01-16 16:00:00'),
-            ('Hamilton Elementary', 'Community Event', 'Community Center', 'Lisa Brown', 'Year 3-4', 12, 15, 'Very enthusiastic group', '2025-01-15', '2025-01-15 11:00:00'),
-            ('Dunedin Academy', 'Workshop', 'Main Hall', 'David Lee', 'Year 6-7', 20, 18, 'Positive feedback', '2025-01-15', '2025-01-15 13:00:00'),
+            ('Auckland Primary School', 'School Festive Day', 'School Hall', 'John Smith', 'Year 5-6', 8, 9, 'Great engagement from students', '2025-01-16', 60, '2025-01-16 10:00:00', -36.8485, 174.7633),
+            ('Wellington High School', 'Community Hub Practice', 'Gymnasium', 'Sarah Johnson', 'Year 7-8', 65, 62, 'Excellent participation', '2025-01-16', 90, '2025-01-16 14:00:00', -41.2865, 174.7762),
+            ('Christchurch College', 'Girl\'s Cricket Programme', 'Sports Field', 'Mike Wilson', 'Year 9-10', 15, 13, 'Good skill development', '2025-01-16', 45, '2025-01-16 16:00:00', -43.5321, 172.6362),
+            ('Hamilton Elementary', 'Kiwi Cricket Skills Session', 'Community Center', 'Lisa Brown', 'Year 3-4', 12, 15, 'Very enthusiastic group', '2025-01-15', 75, '2025-01-15 11:00:00', -37.7870, 175.2793),
+            ('Dunedin Academy', 'In2Cricket Taster', 'Main Hall', 'David Lee', 'Year 6-7', 20, 18, 'Positive feedback', '2025-01-15', 120, '2025-01-15 13:00:00', -45.8788, 170.5028),
         ]
         
         cursor.executemany('''
-            INSERT INTO sessions (school_name, session_type, location, activator, year_group, male_participants, female_participants, teacher_feedback, session_date, date_created)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO sessions (school_name, session_type, location, activator, year_group, male_participants, female_participants, teacher_feedback, session_date, session_duration, date_created, latitude, longitude)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', sample_sessions)
     
     conn.commit()
@@ -78,7 +79,8 @@ def get_sessions():
     
     cursor.execute('''
         SELECT id, school_name, session_type, location, activator, year_group, 
-               male_participants, female_participants, teacher_feedback, session_date, date_created
+               male_participants, female_participants, teacher_feedback, session_date, session_duration, date_created,
+               latitude, longitude
         FROM sessions 
         ORDER BY session_date DESC, date_created DESC
     ''')
@@ -96,7 +98,10 @@ def get_sessions():
             'female_participants': row[7],
             'teacher_feedback': row[8],
             'session_date': row[9],
-            'date_created': row[10],
+            'session_duration': row[10],
+            'date_created': row[11],
+            'latitude': row[12],
+            'longitude': row[13],
             'total_participants': row[6] + row[7]
         })
     
@@ -112,8 +117,9 @@ def create_session():
     
     cursor.execute('''
         INSERT INTO sessions (school_name, session_type, location, activator, year_group, 
-                            male_participants, female_participants, teacher_feedback, session_date)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            male_participants, female_participants, teacher_feedback, session_date,
+                            session_duration, latitude, longitude)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''', (
         data['school_name'],
         data['session_type'],
@@ -123,7 +129,10 @@ def create_session():
         int(data['male_participants']),
         int(data['female_participants']),
         data['teacher_feedback'],
-        data['session_date']
+        data['session_date'],
+        int(data['session_duration']) if data.get('session_duration') else None,
+        float(data['latitude']) if data.get('latitude') else None,
+        float(data['longitude']) if data.get('longitude') else None
     ))
     
     conn.commit()
@@ -141,7 +150,8 @@ def update_session(session_id):
     cursor.execute('''
         UPDATE sessions 
         SET school_name=?, session_type=?, location=?, activator=?, year_group=?, 
-            male_participants=?, female_participants=?, teacher_feedback=?, session_date=?
+            male_participants=?, female_participants=?, teacher_feedback=?, session_date=?,
+            session_duration=?, latitude=?, longitude=?
         WHERE id=?
     ''', (
         data['school_name'],
@@ -153,6 +163,9 @@ def update_session(session_id):
         int(data['female_participants']),
         data['teacher_feedback'],
         data['session_date'],
+        int(data['session_duration']) if data.get('session_duration') else None,
+        float(data['latitude']) if data.get('latitude') else None,
+        float(data['longitude']) if data.get('longitude') else None,
         session_id
     ))
     
