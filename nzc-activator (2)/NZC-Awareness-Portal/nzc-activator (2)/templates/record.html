@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+
+{% block title %}Record Session - NZC Activator{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-lg shadow-sm border p-6">
+        <h1 class="text-2xl font-bold text-gray-900 mb-6">Record New Session</h1>
+        
+        <form id="session-form" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="school_name" class="block text-sm font-medium text-gray-700 mb-2">School/College Name *</label>
+                    <input type="text" id="school_name" name="school_name" required list="school-suggestions"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="Type or select a school/college">
+                    <datalist id="school-suggestions">
+                        <option value="University of Auckland">
+                        <option value="University of Otago">
+                        <option value="University of Canterbury">
+                        <option value="Victoria University of Wellington">
+                        <option value="University of Waikato">
+                        <option value="Massey University">
+                        <option value="Lincoln University">
+                        <option value="Auckland University of Technology">
+                        <option value="Auckland Grammar School">
+                        <option value="Epsom Girls Grammar School">
+                        <option value="St Cuthbert's College">
+                        <option value="King's College">
+                        <option value="Mount Albert Grammar School">
+                        <option value="Wellington College">
+                        <option value="Wellington Girls' College">
+                        <option value="Scots College">
+                        <option value="Samuel Marsden Collegiate School">
+                        <option value="Christchurch Boys' High School">
+                        <option value="Christchurch Girls' High School">
+                        <option value="St Andrew's College">
+                        <option value="Rangi Ruru Girls' School">
+                        <option value="Otago Boys' High School">
+                        <option value="Otago Girls' High School">
+                        <option value="John McGlashan College">
+                    </datalist>
+                </div>
+                
+                <div>
+                    <label for="session_type" class="block text-sm font-medium text-gray-700 mb-2">Session Type *</label>
+                    <input type="text" id="session_type" name="session_type" required list="session-type-suggestions"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="Type or select session type">
+                    <datalist id="session-type-suggestions">
+                        <option value="School Festive Day">
+                        <option value="Community Hub Practice">
+                        <option value="Girl's Cricket Programme">
+                        <option value="Kiwi Cricket Skills Session">
+                        <option value="In2Cricket Taster">
+                    </datalist>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="location" class="block text-sm font-medium text-gray-700 mb-2">Location *</label>
+                    <input type="text" id="location" name="location" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                
+                <div>
+                    <label for="activator" class="block text-sm font-medium text-gray-700 mb-2">Activator *</label>
+                    <input type="text" id="activator" name="activator" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="year_group" class="block text-sm font-medium text-gray-700 mb-2">Year Group *</label>
+                    <select id="year_group" name="year_group" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">Select year group</option>
+                        <option value="Year 3-4">Year 3-4</option>
+                        <option value="Year 5-6">Year 5-6</option>
+                        <option value="Year 7-8">Year 7-8</option>
+                        <option value="Year 9-10">Year 9-10</option>
+                        <option value="Year 11-13">Year 11-13</option>
+                        <option value="Mixed">Mixed</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="session_date" class="block text-sm font-medium text-gray-700 mb-2">Session Date *</label>
+                    <input type="date" id="session_date" name="session_date" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="male_participants" class="block text-sm font-medium text-gray-700 mb-2">Male Participants *</label>
+                    <input type="number" id="male_participants" name="male_participants" min="0" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                
+                <div>
+                    <label for="female_participants" class="block text-sm font-medium text-gray-700 mb-2">Female Participants *</label>
+                    <input type="number" id="female_participants" name="female_participants" min="0" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+            </div>
+
+            <div>
+                <label for="session_duration" class="block text-sm font-medium text-gray-700 mb-2">Session Duration (minutes) *</label>
+                <input type="number" id="session_duration" name="session_duration" min="0" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
+            
+            <div>
+                <label for="teacher_feedback" class="block text-sm font-medium text-gray-700 mb-2">Teacher Feedback</label>
+                <textarea id="teacher_feedback" name="teacher_feedback" rows="4"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder="Optional feedback from teachers..."></textarea>
+            </div>
+            
+            <!-- Geolocation Section -->
+            <div class="border-t pt-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Location Services</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="latitude" class="block text-sm font-medium text-gray-700 mb-2">Latitude</label>
+                        <input type="number" id="latitude" name="latitude" step="any"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="e.g., -36.8485">
+                    </div>
+                    <div>
+                        <label for="longitude" class="block text-sm font-medium text-gray-700 mb-2">Longitude</label>
+                        <input type="number" id="longitude" name="longitude" step="any"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="e.g., 174.7633">
+                    </div>
+                </div>
+                <button type="button" id="get-location" 
+                        class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors">
+                    <i class="fas fa-map-marker-alt mr-2"></i>
+                    Get Current Location
+                </button>
+                <p id="location-status" class="text-sm text-gray-600 mt-2"></p>
+            </div>
+            
+            <!-- Photo Upload Section -->
+            <div class="border-t pt-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Photo Upload</h3>
+                <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                    <i class="fas fa-camera text-gray-400 text-3xl mb-4"></i>
+                    <p class="text-gray-600 mb-2">Upload session photos</p>
+                    <input type="file" id="photo-upload" accept="image/*" multiple class="hidden">
+                    <button type="button" onclick="document.getElementById('photo-upload').click()"
+                            class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+                        <i class="fas fa-upload mr-2"></i>
+                        Choose Photos
+                    </button>
+                </div>
+                <div id="photo-preview" class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+            </div>
+            
+            <div class="flex justify-end space-x-4 pt-6">
+                <a href="/" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors">
+                    Cancel
+                </a>
+                <button type="submit" 
+                        class="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+                    Record Session
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Set current date as default
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('session_date').value = today;
+});
+
+// Form submission
+document.getElementById('session-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData.entries());
+    
+    try {
+        const response = await fetch('/api/sessions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+        
+        if (response.ok) {
+            window.location.href = '/success';
+        } else {
+            alert('Error recording session. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error recording session. Please try again.');
+    }
+});
+
+// Geolocation
+document.getElementById('get-location').addEventListener('click', function() {
+    const statusElement = document.getElementById('location-status');
+    const latitudeInput = document.getElementById('latitude');
+    const longitudeInput = document.getElementById('longitude');
+    
+    if (navigator.geolocation) {
+        statusElement.textContent = 'Getting location...';
+        
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                statusElement.textContent = `Location captured: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                statusElement.className = 'text-sm text-green-600 mt-2';
+                latitudeInput.value = lat;
+                longitudeInput.value = lng;
+            },
+            function(error) {
+                statusElement.textContent = 'Unable to get location. Please check your browser settings.';
+                statusElement.className = 'text-sm text-red-600 mt-2';
+            }
+        );
+    } else {
+        statusElement.textContent = 'Geolocation is not supported by this browser.';
+        statusElement.className = 'text-sm text-red-600 mt-2';
+    }
+});
+
+// Photo upload preview
+document.getElementById('photo-upload').addEventListener('change', function(e) {
+    const previewContainer = document.getElementById('photo-preview');
+    previewContainer.innerHTML = '';
+    
+    Array.from(e.target.files).forEach(file => {
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.className = 'w-full h-24 object-cover rounded-lg';
+                previewContainer.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,434 @@
+{% extends "base.html" %}
+
+{% block title %}Sessions - NZC Activator{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h1 class="text-2xl font-bold text-gray-900">My Sessions</h1>
+        <a href="/record" 
+           class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+            <i class="fas fa-plus mr-2"></i>
+            Record New Session
+        </a>
+    </div>
+    
+    <!-- Search and Filter -->
+    <div class="bg-white rounded-lg shadow-sm border p-4">
+        <div class="flex flex-col sm:flex-row gap-4">
+            <div class="flex-1">
+                <input type="text" id="search-input" placeholder="Search sessions..."
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
+            <div class="sm:w-48">
+                <select id="type-filter"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">All Types</option>
+                    <option value="School Festive Day">School Festive Day</option>
+                    <option value="Community Hub Practice">Community Hub Practice</option>
+                    <option value="Girl's Cricket Programme">Girl's Cricket Programme</option>
+                    <option value="Kiwi Cricket Skills Session">Kiwi Cricket Skills Session</option>
+                    <option value="In2Cricket Taster">In2Cricket Taster</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sessions List -->
+    <div class="bg-white rounded-lg shadow-sm border">
+        <div id="sessions-container">
+            <!-- Sessions will be loaded here -->
+        </div>
+        
+        <div id="loading" class="p-8 text-center">
+            <i class="fas fa-spinner fa-spin text-gray-400 text-2xl"></i>
+            <p class="text-gray-600 mt-2">Loading sessions...</p>
+        </div>
+        
+        <div id="no-sessions" class="p-8 text-center hidden">
+            <i class="fas fa-clipboard-list text-gray-400 text-4xl mb-4"></i>
+            <p class="text-gray-600">No sessions found</p>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Session Modal -->
+<div id="edit-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-screen overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-gray-900">Edit Session</h2>
+                    <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <form id="edit-form" class="space-y-4">
+                    <input type="hidden" id="edit-session-id">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">School/College Name *</label>
+                            <input type="text" id="edit-school-name" required list="edit-school-suggestions"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="Type or select a school/college">
+                            <datalist id="edit-school-suggestions">
+                                <option value="University of Auckland">
+                                <option value="University of Otago">
+                                <option value="University of Canterbury">
+                                <option value="Victoria University of Wellington">
+                                <option value="University of Waikato">
+                                <option value="Massey University">
+                                <option value="Lincoln University">
+                                <option value="Auckland University of Technology">
+                                <option value="Auckland Grammar School">
+                                <option value="Epsom Girls Grammar School">
+                                <option value="St Cuthbert's College">
+                                <option value="King's College">
+                                <option value="Mount Albert Grammar School">
+                                <option value="Wellington College">
+                                <option value="Wellington Girls' College">
+                                <option value="Scots College">
+                                <option value="Samuel Marsden Collegiate School">
+                                <option value="Christchurch Boys' High School">
+                                <option value="Christchurch Girls' High School">
+                                <option value="St Andrew's College">
+                                <option value="Rangi Ruru Girls' School">
+                                <option value="Otago Boys' High School">
+                                <option value="Otago Girls' High School">
+                                <option value="John McGlashan College">
+                            </datalist>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Session Type *</label>
+                            <input type="text" id="edit-session-type" required list="edit-session-type-suggestions"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="Type or select session type">
+                            <datalist id="edit-session-type-suggestions">
+                                <option value="School Festive Day">
+                                <option value="Community Hub Practice">
+                                <option value="Girl's Cricket Programme">
+                                <option value="Kiwi Cricket Skills Session">
+                                <option value="In2Cricket Taster">
+                            </datalist>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Location *</label>
+                            <input type="text" id="edit-location" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Activator *</label>
+                            <input type="text" id="edit-activator" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Year Group *</label>
+                            <select id="edit-year-group" required
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="Year 3-4">Year 3-4</option>
+                                <option value="Year 5-6">Year 5-6</option>
+                                <option value="Year 7-8">Year 7-8</option>
+                                <option value="Year 9-10">Year 9-10</option>
+                                <option value="Year 11-13">Year 11-13</option>
+                                <option value="Mixed">Mixed</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Session Date *</label>
+                            <input type="date" id="edit-session-date" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Male Participants *</label>
+                            <input type="number" id="edit-male-participants" min="0" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Female Participants *</label>
+                            <input type="number" id="edit-female-participants" min="0" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Session Duration (minutes) *</label>
+                        <input type="number" id="edit-session-duration" min="0" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Latitude</label>
+                            <input type="number" id="edit-latitude" step="any"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="e.g., -36.8485">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Longitude</label>
+                            <input type="number" id="edit-longitude" step="any"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="e.g., 174.7633">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Teacher Feedback</label>
+                        <textarea id="edit-teacher-feedback" rows="3"
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <button type="button" onclick="closeEditModal()" 
+                                class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50">
+                            Cancel
+                        </button>
+                        <button type="submit" 
+                                class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                            Update Session
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let allSessions = [];
+let filteredSessions = [];
+
+// Load sessions
+async function loadSessions() {
+    try {
+        const response = await fetch('/api/sessions');
+        allSessions = await response.json();
+        filteredSessions = [...allSessions];
+        displaySessions();
+        document.getElementById('loading').style.display = 'none';
+    } catch (error) {
+        console.error('Error loading sessions:', error);
+        document.getElementById('loading').innerHTML = '<p class="text-red-600">Error loading sessions</p>';
+    }
+}
+
+function displaySessions() {
+    const container = document.getElementById('sessions-container');
+    const noSessionsDiv = document.getElementById('no-sessions');
+    
+    if (filteredSessions.length === 0) {
+        container.innerHTML = '';
+        noSessionsDiv.classList.remove('hidden');
+        return;
+    }
+    
+    noSessionsDiv.classList.add('hidden');
+    
+    container.innerHTML = filteredSessions.map((session, index) => `
+        <div class="p-4 md:p-6 ${index !== filteredSessions.length - 1 ? 'border-b border-gray-200' : ''}">
+            <div class="flex flex-col gap-3">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                        <h3 class="text-lg font-semibold text-gray-900">${session.school_name}</h3>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 w-fit">
+                            ${session.session_type}
+                        </span>
+                    </div>
+                    
+                    <div class="flex gap-2">
+                        <button onclick="editSession(${session.id})" 
+                                class="px-3 py-1 text-blue-600 hover:bg-blue-50 rounded-md transition-colors text-sm">
+                            <i class="fas fa-edit mr-1"></i>Edit
+                        </button>
+                        <button onclick="deleteSession(${session.id})" 
+                                class="px-3 py-1 text-red-600 hover:bg-red-50 rounded-md transition-colors text-sm">
+                            <i class="fas fa-trash mr-1"></i>Delete
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm text-gray-600">
+                    <div>
+                        <i class="fas fa-map-marker-alt mr-1"></i>
+                        <strong>Location:</strong> ${session.location}
+                    </div>
+                    <div>
+                        <i class="fas fa-user mr-1"></i>
+                        <strong>Activator:</strong> ${session.activator}
+                    </div>
+                    <div>
+                        <i class="fas fa-graduation-cap mr-1"></i>
+                        <strong>Year Group:</strong> ${session.year_group}
+                    </div>
+                    <div>
+                        <i class="fas fa-calendar mr-1"></i>
+                        <strong>Session Date:</strong> ${new Date(session.session_date).toLocaleDateString()}
+                    </div>
+                    <div>
+                        <i class="fas fa-clock mr-1"></i>
+                        <strong>Recorded:</strong> ${new Date(session.date_created).toLocaleDateString()} ${new Date(session.date_created).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                    </div>
+                    <div>
+                        <i class="fas fa-hourglass-half mr-1"></i>
+                        <strong>Duration:</strong> ${session.session_duration ? session.session_duration + ' minutes' : 'N/A'}
+                    </div>
+                    ${session.latitude && session.longitude ? `
+                        <div>
+                            <i class="fas fa-globe mr-1"></i>
+                            <strong>Coords:</strong> ${session.latitude.toFixed(4)}, ${session.longitude.toFixed(4)}
+                        </div>
+                    ` : ''}
+                </div>
+                
+                <div class="flex flex-wrap gap-4 text-sm">
+                    <span class="text-blue-600 font-medium">
+                        <i class="fas fa-users mr-1"></i>
+                        Total: ${session.total_participants} participants
+                    </span>
+                    <span class="text-gray-600">
+                        Male: ${session.male_participants}
+                    </span>
+                    <span class="text-gray-600">
+                        Female: ${session.female_participants}
+                    </span>
+                </div>
+                
+                ${session.teacher_feedback ? `
+                    <div class="p-3 bg-gray-50 rounded-md">
+                        <p class="text-sm text-gray-700">
+                            <strong>Teacher Feedback:</strong> ${session.teacher_feedback}
+                        </p>
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+function filterSessions() {
+    const searchTerm = document.getElementById('search-input').value.toLowerCase();
+    const typeFilter = document.getElementById('type-filter').value;
+    
+    filteredSessions = allSessions.filter(session => {
+        const matchesSearch = !searchTerm || 
+            session.school_name.toLowerCase().includes(searchTerm) ||
+            session.location.toLowerCase().includes(searchTerm) ||
+            session.activator.toLowerCase().includes(searchTerm) ||
+            session.session_type.toLowerCase().includes(searchTerm);
+            
+        const matchesType = !typeFilter || session.session_type === typeFilter;
+        
+        return matchesSearch && matchesType;
+    });
+    
+    displaySessions();
+}
+
+function editSession(id) {
+    const session = allSessions.find(s => s.id === id);
+    if (session) {
+        document.getElementById('edit-session-id').value = session.id;
+        document.getElementById('edit-school-name').value = session.school_name;
+        document.getElementById('edit-session-type').value = session.session_type;
+        document.getElementById('edit-location').value = session.location;
+        document.getElementById('edit-activator').value = session.activator;
+        document.getElementById('edit-year-group').value = session.year_group;
+        document.getElementById('edit-session-date').value = session.session_date;
+        document.getElementById('edit-male-participants').value = session.male_participants;
+        document.getElementById('edit-female-participants').value = session.female_participants;
+        document.getElementById('edit-teacher-feedback').value = session.teacher_feedback || '';
+        document.getElementById('edit-session-duration').value = session.session_duration || '';
+        document.getElementById('edit-latitude').value = session.latitude || '';
+        document.getElementById('edit-longitude').value = session.longitude || '';
+        
+        document.getElementById('edit-modal').classList.remove('hidden');
+    }
+}
+
+function closeEditModal() {
+    document.getElementById('edit-modal').classList.add('hidden');
+}
+
+async function deleteSession(id) {
+    const session = allSessions.find(s => s.id === id);
+    if (session && confirm(`Are you sure you want to delete the session at ${session.school_name}? This action cannot be undone.`)) {
+        try {
+            const response = await fetch(`/api/sessions/${id}`, {
+                method: 'DELETE'
+            });
+            
+            if (response.ok) {
+                loadSessions(); // Reload sessions
+            } else {
+                alert('Error deleting session. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error deleting session. Please try again.');
+        }
+    }
+}
+
+// Edit form submission
+document.getElementById('edit-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const sessionId = document.getElementById('edit-session-id').value;
+    const data = {
+        school_name: document.getElementById('edit-school-name').value,
+        session_type: document.getElementById('edit-session-type').value,
+        location: document.getElementById('edit-location').value,
+        activator: document.getElementById('edit-activator').value,
+        year_group: document.getElementById('edit-year-group').value,
+        session_date: document.getElementById('edit-session-date').value,
+        male_participants: document.getElementById('edit-male-participants').value,
+        female_participants: document.getElementById('edit-female-participants').value,
+        teacher_feedback: document.getElementById('edit-teacher-feedback').value,
+        session_duration: document.getElementById('edit-session-duration').value,
+        latitude: document.getElementById('edit-latitude').value,
+        longitude: document.getElementById('edit-longitude').value
+    };
+    
+    try {
+        const response = await fetch(`/api/sessions/${sessionId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+        
+        if (response.ok) {
+            closeEditModal();
+            loadSessions(); // Reload sessions
+        } else {
+            alert('Error updating session. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error updating session. Please try again.');
+    }
+});
+
+// Event listeners
+document.getElementById('search-input').addEventListener('input', filterSessions);
+document.getElementById('type-filter').addEventListener('change', filterSessions);
+
+// Load sessions when page loads
+document.addEventListener('DOMContentLoaded', loadSessions);
+</script>
+{% endblock %}

@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - NZC Activator{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
+    
+    <!-- Stats Overview -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white rounded-lg shadow-sm border p-6">
+            <div class="flex items-center">
+                <div class="p-2 bg-blue-100 rounded-lg">
+                    <i class="fas fa-users text-blue-600"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">Total Participants</p>
+                    <p class="text-2xl font-bold text-gray-900" id="total-participants-stat">-</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-sm border p-6">
+            <div class="flex items-center">
+                <div class="p-2 bg-green-100 rounded-lg">
+                    <i class="fas fa-clipboard-list text-green-600"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">Total Sessions</p>
+                    <p class="text-2xl font-bold text-gray-900" id="total-sessions-stat">-</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-sm border p-6">
+            <div class="flex items-center">
+                <div class="p-2 bg-yellow-100 rounded-lg">
+                    <i class="fas fa-school text-yellow-600"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">Schools Reached</p>
+                    <p class="text-2xl font-bold text-gray-900" id="schools-reached-stat">-</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-sm border p-6">
+            <div class="flex items-center">
+                <div class="p-2 bg-purple-100 rounded-lg">
+                    <i class="fas fa-calendar-week text-purple-600"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">This Week</p>
+                    <p class="text-2xl font-bold text-gray-900" id="week-participants-stat">-</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Participation Trend (last week)-->
+        <div class="bg-white rounded-lg shadow-sm border p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Participation Trend</h2>
+            <div class="h-80">
+                <canvas id="trendChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- Session Types -->
+        <div class="bg-white rounded-lg shadow-sm border p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Session Types Distribution</h2>
+            <div class="h-80">
+                <canvas id="sessionTypesChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Gender Distribution -->
+    <div class="bg-white rounded-lg shadow-sm border p-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Gender Distribution</h2>
+        <div class="h-80">
+            <canvas id="genderChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+let trendChart, sessionTypesChart, genderChart;
+
+// Load dashboard data
+async function loadDashboardData() {
+    try {
+        const [statsResponse, sessionsResponse] = await Promise.all([
+            fetch('/api/stats'),
+            fetch('/api/sessions')
+        ]);
+        
+        const stats = await statsResponse.json();
+        const sessions = await sessionsResponse.json();
+        
+        updateStats(stats, sessions);
+        createCharts(stats, sessions);
+        
+    } catch (error) {
+        console.error('Error loading dashboard data:', error);
+    }
+}
+
+function updateStats(stats, sessions) {
+    const totalParticipants = sessions.reduce((sum, session) => sum + session.total_participants, 0);
+    const uniqueSchools = new Set(sessions.map(session => session.school_name)).size;
+    
+    document.getElementById('total-participants-stat').textContent = totalParticipants;
+    document.getElementById('total-sessions-stat').textContent = sessions.length;
+    document.getElementById('schools-reached-stat').textContent = uniqueSchools;
+    document.getElementById('week-participants-stat').textContent = stats.recent_participants;
+}
+
+function createCharts(stats, sessions) {
+    // Trend Chart
+    const trendCtx = document.getElementById('trendChart').getContext('2d');
+    trendChart = new Chart(trendCtx, {
+        type: 'line',
+        data: {
+            labels: stats.daily_stats.map(stat => stat.day),
+            datasets: [{
+                label: 'Daily Participants',
+                data: stats.daily_stats.map(stat => stat.participants),
+                borderColor: '#3B82F6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    
+    // Session Types Chart
+    const sessionTypes = {};
+    sessions.forEach(session => {
+        sessionTypes[session.session_type] = (sessionTypes[session.session_type] || 0) + 1;
+    });
+    
+    const sessionTypesCtx = document.getElementById('sessionTypesChart').getContext('2d');
+    sessionTypesChart = new Chart(sessionTypesCtx, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(sessionTypes),
+            datasets: [{
+                data: Object.values(sessionTypes),
+                backgroundColor: [
+                    '#3B82F6',
+                    '#10B981',
+                    '#F59E0B',
+                    '#EF4444',
+                    '#73f65cff',
+                    '#53165cff',
+                    '#ffff0aff',
+                    '#21deabff',
+                    '#d565ceff'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+    
+    // Gender Distribution Chart
+    const totalMale = sessions.reduce((sum, session) => sum + session.male_participants, 0);
+    const totalFemale = sessions.reduce((sum, session) => sum + session.female_participants, 0);
+    
+    const genderCtx = document.getElementById('genderChart').getContext('2d');
+    genderChart = new Chart(genderCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Male', 'Female'],
+            datasets: [{
+                label: 'Participants',
+                data: [totalMale, totalFemale],
+                backgroundColor: ['#3B82F6', '#EC4899'],
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+// Load data when page loads
+document.addEventListener('DOMContentLoaded', loadDashboardData);
+</script>
+{% endblock %}
