@@ -1,0 +1,1083 @@
+{% extends "base.html" %}
+
+{% block title %}Sessions - NZC Activator{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h1 class="text-2xl font-bold text-gray-900">My Sessions</h1>
+        <a href="/record" 
+           class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+            <i class="fas fa-plus mr-2"></i>
+            Record New Session
+        </a>
+    </div>
+    
+    <!-- Search and Filter -->
+    <div class="bg-white rounded-lg shadow-sm border p-4">
+        <div class="flex flex-col sm:flex-row gap-4">
+            <div class="flex-1">
+                <input type="text" id="search-input" placeholder="Search sessions..."
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
+            <div class="sm:w-48">
+                <select id="type-filter"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">All Types</option>
+                    <option value="School Festive Day">School Festive Day</option>
+                    <option value="Community Hub Practice">Community Hub Practice</option>
+                    <option value="Girl's Cricket Programme">Girl's Cricket Programme</option>
+                    <option value="Kiwi Cricket Skills Session">Kiwi Cricket Skills Session</option>
+                    <option value="In2Cricket Taster">In2Cricket Taster</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sessions List -->
+    <div class="bg-white rounded-lg shadow-sm border">
+        <div id="sessions-container">
+            <!-- Sessions will be loaded here -->
+        </div>
+        
+        <div id="loading" class="p-8 text-center">
+            <i class="fas fa-spinner fa-spin text-gray-400 text-2xl"></i>
+            <p class="text-gray-600 mt-2">Loading sessions...</p>
+        </div>
+        
+        <div id="no-sessions" class="p-8 text-center hidden">
+            <i class="fas fa-clipboard-list text-gray-400 text-4xl mb-4"></i>
+            <p class="text-gray-600">No sessions found</p>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Session Modal -->
+<div id="edit-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-screen overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-gray-900">Edit Session</h2>
+                    <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <form id="edit-form" class="space-y-4">
+                    <input type="hidden" id="edit-session-id">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">School/College Name *</label>
+                            <input type="text" id="edit-school-name" required list="edit-school-suggestions"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="Type or select a school/college">
+                            <datalist id="edit-school-suggestions">
+                                <option value="University of Auckland">
+                                <option value="University of Otago">
+                                <option value="University of Canterbury">
+                                <option value="Victoria University of Wellington">
+                                <option value="University of Waikato">
+                                <option value="Massey University">
+                                <option value="Lincoln University">
+                                <option value="Auckland University of Technology">
+                                <option value="Auckland Grammar School">
+                                <option value="Epsom Girls Grammar School">
+                                <option value="St Cuthbert's College">
+                                <option value="King's College">
+                                <option value="Mount Albert Grammar School">
+                                <option value="Wellington College">
+                                <option value="Wellington Girls' College">
+                                <option value="Scots College">
+                                <option value="Samuel Marsden Collegiate School">
+                                <option value="Christchurch Boys' High School">
+                                <option value="Christchurch Girls' High School">
+                                <option value="St Andrew's College">
+                                <option value="Rangi Ruru Girls' School">
+                                <option value="Otago Boys' High School">
+                                <option value="Otago Girls' High School">
+                                <option value="John McGlashan College">
+                            </datalist>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Session Type *</label>
+                            <input type="text" id="edit-session-type" required list="edit-session-type-suggestions"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="Type or select session type">
+                            <datalist id="edit-session-type-suggestions">
+                                <option value="School Festive Day">
+                                <option value="Community Hub Practice">
+                                <option value="Girl's Cricket Programme">
+                                <option value="Kiwi Cricket Skills Session">
+                                <option value="In2Cricket Taster">
+                                <option value="Other">
+                            </datalist>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Location *</label>
+                            <input type="text" id="edit-location" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Activator *</label>
+                            <input type="text" id="edit-activator" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Year Group *</label>
+                            <select id="edit-year-group" required
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="Year 3-4">Year 3-4</option>
+                                <option value="Year 5-6">Year 5-6</option>
+                                <option value="Year 7-8">Year 7-8</option>
+                                <option value="Year 9-10">Year 9-10</option>
+                                <option value="Year 11-13">Year 11-13</option>
+                                <option value="Mixed">Mixed</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Session Date *</label>
+                            <input type="date" id="edit-session-date" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Male Participants *</label>
+                            <input type="number" id="edit-male-participants" min="0" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Female Participants *</label>
+                            <input type="number" id="edit-female-participants" min="0" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Session Duration (minutes) *</label>
+                        <input type="number" id="edit-session-duration" min="0" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Latitude</label>
+                            <input type="number" id="edit-latitude" step="any"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="e.g., -36.8485">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Longitude</label>
+                            <input type="number" id="edit-longitude" step="any"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="e.g., 174.7633">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Teacher/Coach Feedback</label>
+                        <textarea id="edit-teacher-feedback" rows="3"
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <button type="button" onclick="closeEditModal()" 
+                                class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50">
+                            Cancel
+                        </button>
+                        <button type="submit" 
+                                class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                            Update Session
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- View Photos Modal -->
+<div id="photos-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-screen overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-gray-900">Session Photos</h2>
+                    <button onclick="closePhotosModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div id="photos-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    <!-- Photos will be loaded here -->
+                </div>
+                
+                <div id="photos-loading" class="text-center py-8">
+                    <i class="fas fa-spinner fa-spin text-gray-400 text-2xl"></i>
+                    <p class="text-gray-600 mt-2">Loading photos...</p>
+                </div>
+                
+                <div id="no-photos" class="text-center py-8 hidden">
+                    <i class="fas fa-camera text-gray-400 text-4xl mb-4"></i>
+                    <p class="text-gray-600">No photos found for this session</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let allSessions = [];
+let filteredSessions = [];
+
+// Load sessions
+async function loadSessions() {
+  try {
+    let onlineSessions = []
+    let offlineSessions = []
+    
+    // Load online sessions if connected
+    if (navigator.onLine) {
+      try {
+        const response = await fetch('/api/sessions')
+        onlineSessions = await response.json()
+      } catch (error) {
+        console.log('Failed to load online sessions:', error)
+      }
+    }
+    
+    // Load offline sessions
+    if (window.offlineSyncManager && window.offlineSyncManager.isReady()) {
+      try {
+        const allOfflineSessions = await window.offlineSyncManager.getOfflineSessions()
+        // Only show unsynced offline sessions
+        offlineSessions = allOfflineSessions.filter(session => !session.synced)
+      } catch (error) {
+        console.log('Failed to load offline sessions:', error)
+      }
+    }
+    
+    // Combine and sort sessions
+    allSessions = [...onlineSessions, ...offlineSessions].sort((a, b) => {
+      const dateA = new Date(a.session_date || a.timestamp)
+      const dateB = new Date(b.session_date || b.timestamp)
+      return dateB - dateA
+    })
+    
+    filteredSessions = [...allSessions]
+    displaySessions()
+    document.getElementById('loading').style.display = 'none'
+  } catch (error) {
+    console.error('Error loading sessions:', error)
+    document.getElementById('loading').innerHTML = '<p class="text-red-600">Error loading sessions</p>'
+  }
+}
+
+// Update displaySessions to handle offline sessions
+function displaySessions() {
+    const container = document.getElementById('sessions-container');
+    const noSessionsDiv = document.getElementById('no-sessions');
+    
+    if (filteredSessions.length === 0) {
+        container.innerHTML = '';
+        noSessionsDiv.classList.remove('hidden');
+        return;
+    }
+    
+    noSessionsDiv.classList.add('hidden');
+    
+    container.innerHTML = filteredSessions.map((session, index) => `
+        <div class="p-4 md:p-6 ${index !== filteredSessions.length - 1 ? 'border-b border-gray-200' : ''}">
+            <div class="flex flex-col gap-3">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                        <h3 class="text-lg font-semibold text-gray-900">${session.school_name}</h3>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 w-fit">
+                            ${session.session_type}
+                        </span>
+                        ${session.isOffline ? `
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800 w-fit">
+                                <i class="fas fa-wifi-slash mr-1"></i>Offline
+                            </span>
+                        ` : ''}
+                        ${session.photo_count > 0 ? `
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 w-fit">
+                                <i class="fas fa-camera mr-1"></i>${session.photo_count} photo${session.photo_count > 1 ? 's' : ''}
+                            </span>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="flex gap-2">
+                        ${!session.isOffline && session.photo_count > 0 ? `
+                            <button onclick="viewPhotos(${session.id})" 
+                                    class="px-3 py-1 text-green-600 hover:bg-green-50 rounded-md transition-colors text-sm">
+                                <i class="fas fa-images mr-1"></i>View Photos
+                            </button>
+                        ` : ''}
+                        ${!session.isOffline ? `
+                            <button onclick="editSession(${session.id})" 
+                                    class="px-3 py-1 text-blue-600 hover:bg-blue-50 rounded-md transition-colors text-sm">
+                                <i class="fas fa-edit mr-1"></i>Edit
+                            </button>
+                            <button onclick="deleteSession(${session.id})" 
+                                    class="px-3 py-1 text-red-600 hover:bg-red-50 rounded-md transition-colors text-sm">
+                                <i class="fas fa-trash mr-1"></i>Delete
+                            </button>
+                        ` : `
+                            <span class="px-3 py-1 text-gray-500 text-sm">
+                                <i class="fas fa-clock mr-1"></i>Pending sync
+                            </span>
+                        `}
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm text-gray-600">
+                    <div>
+                        <i class="fas fa-map-marker-alt mr-1"></i>
+                        <strong>Location:</strong> ${session.location}
+                    </div>
+                    <div>
+                        <i class="fas fa-user mr-1"></i>
+                        <strong>Activator:</strong> ${session.activator}
+                    </div>
+                    <div>
+                        <i class="fas fa-graduation-cap mr-1"></i>
+                        <strong>Year Group:</strong> ${session.year_group}
+                    </div>
+                    <div>
+                        <i class="fas fa-calendar mr-1"></i>
+                        <strong>Session Date:</strong> ${new Date(session.session_date || session.timestamp).toLocaleDateString()}
+                    </div>
+                    <div>
+                        <i class="fas fa-clock mr-1"></i>
+                        <strong>Recorded:</strong> ${new Date(session.date_created || session.timestamp).toLocaleDateString()} ${new Date(session.date_created || session.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                    </div>
+                    <div>
+                        <i class="fas fa-hourglass-half mr-1"></i>
+                        <strong>Duration:</strong> ${session.session_duration ? session.session_duration + ' minutes' : 'N/A'}
+                    </div>
+                    ${session.latitude && session.longitude ? `
+                        <div>
+                            <i class="fas fa-globe mr-1"></i>
+                            <strong>Coords:</strong> ${session.latitude.toFixed(4)}, ${session.longitude.toFixed(4)}
+                        </div>
+                    ` : ''}
+                </div>
+                
+                <div class="flex flex-wrap gap-4 text-sm">
+                    <span class="text-blue-600 font-medium">
+                        <i class="fas fa-users mr-1"></i>
+                        Total: ${(session.male_participants || 0) + (session.female_participants || 0)} participants
+                    </span>
+                    <span class="text-gray-600">
+                        Male: ${session.male_participants || 0}
+                    </span>
+                    <span class="text-gray-600">
+                        Female: ${session.female_participants || 0}
+                    </span>
+                </div>
+                
+                ${session.teacher_feedback ? `
+                    <div class="p-3 bg-gray-50 rounded-md">
+                        <p class="text-sm text-gray-700">
+                            <strong>Teacher Feedback:</strong> ${session.teacher_feedback}
+                        </p>
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+function filterSessions() {
+    const searchTerm = document.getElementById('search-input').value.toLowerCase();
+    const typeFilter = document.getElementById('type-filter').value;
+    
+    filteredSessions = allSessions.filter(session => {
+        const matchesSearch = !searchTerm || 
+            session.school_name.toLowerCase().includes(searchTerm) ||
+            session.location.toLowerCase().includes(searchTerm) ||
+            session.activator.toLowerCase().includes(searchTerm) ||
+            session.session_type.toLowerCase().includes(searchTerm);
+            
+        const matchesType = !typeFilter || session.session_type === typeFilter;
+        
+        return matchesSearch && matchesType;
+    });
+    
+    displaySessions();
+}
+
+function editSession(id) {
+    const session = allSessions.find(s => s.id === id);
+    if (session) {
+        document.getElementById('edit-session-id').value = session.id;
+        document.getElementById('edit-school-name').value = session.school_name;
+        document.getElementById('edit-session-type').value = session.session_type;
+        document.getElementById('edit-location').value = session.location;
+        document.getElementById('edit-activator').value = session.activator;
+        document.getElementById('edit-year-group').value = session.year_group;
+        document.getElementById('edit-session-date').value = session.session_date;
+        document.getElementById('edit-male-participants').value = session.male_participants;
+        document.getElementById('edit-female-participants').value = session.female_participants;
+        document.getElementById('edit-teacher-feedback').value = session.teacher_feedback || '';
+        document.getElementById('edit-session-duration').value = session.session_duration || '';
+        document.getElementById('edit-latitude').value = session.latitude || '';
+        document.getElementById('edit-longitude').value = session.longitude || '';
+        
+        document.getElementById('edit-modal').classList.remove('hidden');
+    }
+}
+
+function closeEditModal() {
+    clearEditErrorMessages();
+    // Clear all field errors
+    document.querySelectorAll('#edit-form input, #edit-form select, #edit-form textarea').forEach(field => {
+        clearEditFieldError(field);
+    });
+    document.getElementById('edit-modal').classList.add('hidden');
+}
+
+async function viewPhotos(sessionId) {
+    document.getElementById('photos-modal').classList.remove('hidden');
+    document.getElementById('photos-loading').classList.remove('hidden');
+    document.getElementById('no-photos').classList.add('hidden');
+    document.getElementById('photos-container').innerHTML = '';
+    
+    try {
+        const response = await fetch(`/api/sessions/${sessionId}/photos`);
+        const result = await response.json();
+        
+        document.getElementById('photos-loading').classList.add('hidden');
+        
+        if (result.success && result.photos.length > 0) {
+            displayPhotos(result.photos, sessionId);
+        } else {
+            document.getElementById('no-photos').classList.remove('hidden');
+        }
+    } catch (error) {
+        console.error('Error loading photos:', error);
+        document.getElementById('photos-loading').innerHTML = '<p class="text-red-600">Error loading photos</p>';
+    }
+}
+
+function displayPhotos(photos, sessionId) {
+    const container = document.getElementById('photos-container');
+    
+    container.innerHTML = photos.map(photo => `
+        <div class="relative group">
+            <img src="${photo.url}" alt="${photo.original_filename}" 
+                 class="w-full h-48 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                 onclick="openPhotoModal('${photo.url}', '${photo.original_filename}')">
+            <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button onclick="deletePhoto(${sessionId}, ${photo.id})" 
+                        class="bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600 transition-colors">
+                    <i class="fas fa-trash text-sm"></i>
+                </button>
+            </div>
+            <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 rounded-b-lg">
+                <p class="text-sm truncate">${photo.original_filename}</p>
+                <p class="text-xs opacity-75">${formatFileSize(photo.file_size)}</p>
+            </div>
+        </div>
+    `).join('');
+}
+
+function closePhotosModal() {
+    document.getElementById('photos-modal').classList.add('hidden');
+}
+
+function openPhotoModal(url, filename) {
+    // Create a simple photo viewer modal
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50';
+    modal.onclick = function() { document.body.removeChild(modal); };
+    
+    const img = document.createElement('img');
+    img.src = url;
+    img.className = 'max-w-full max-h-full object-contain';
+    img.onclick = function(e) { e.stopPropagation(); };
+    
+    const closeBtn = document.createElement('button');
+    closeBtn.innerHTML = '×';
+    closeBtn.className = 'absolute top-4 right-4 text-white text-4xl hover:text-gray-300';
+    closeBtn.onclick = function() { document.body.removeChild(modal); };
+    
+    modal.appendChild(img);
+    modal.appendChild(closeBtn);
+    document.body.appendChild(modal);
+}
+
+async function deletePhoto(sessionId, photoId) {
+    if (!confirm('Are you sure you want to delete this photo?')) return;
+    
+    try {
+        const response = await fetch(`/api/sessions/${sessionId}/photos/${photoId}`, {
+            method: 'DELETE'
+        });
+        
+        if (response.ok) {
+            // Refresh photos view
+            viewPhotos(sessionId);
+            // Refresh sessions list to update photo count
+            loadSessions();
+        } else {
+            alert('Error deleting photo. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error deleting photo. Please try again.');
+    }
+}
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+async function deleteSession(id) {
+    const session = allSessions.find(s => s.id === id);
+    if (session && confirm(`Are you sure you want to delete the session at ${session.school_name}? This action cannot be undone and will also delete all associated photos.`)) {
+        try {
+            const response = await fetch(`/api/sessions/${id}`, {
+                method: 'DELETE'
+            });
+            
+            if (response.ok) {
+                loadSessions(); // Reload sessions
+            } else {
+                alert('Error deleting session. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error deleting session. Please try again.');
+        }
+    }
+}
+
+// Enhanced edit form submission with validation
+document.getElementById('edit-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    // Clear previous error messages
+    clearEditErrorMessages();
+    
+    const sessionId = document.getElementById('edit-session-id').value;
+    const data = {
+        school_name: document.getElementById('edit-school-name').value,
+        session_type: document.getElementById('edit-session-type').value,
+        location: document.getElementById('edit-location').value,
+        activator: document.getElementById('edit-activator').value,
+        year_group: document.getElementById('edit-year-group').value,
+        session_date: document.getElementById('edit-session-date').value,
+        male_participants: document.getElementById('edit-male-participants').value,
+        female_participants: document.getElementById('edit-female-participants').value,
+        teacher_feedback: document.getElementById('edit-teacher-feedback').value,
+        session_duration: document.getElementById('edit-session-duration').value,
+        latitude: document.getElementById('edit-latitude').value,
+        longitude: document.getElementById('edit-longitude').value
+    };
+    
+    // Client-side validation
+    const validationErrors = validateEditFormData(data);
+    if (validationErrors.length > 0) {
+        displayEditErrorMessages(validationErrors);
+        return;
+    }
+    
+    // Show loading state
+    const submitButton = document.querySelector('#edit-form button[type="submit"]');
+    const originalText = submitButton.textContent;
+    submitButton.textContent = 'Updating...';
+    submitButton.disabled = true;
+    
+    try {
+        const response = await fetch(`/api/sessions/${sessionId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.success) {
+            closeEditModal();
+            loadSessions(); // Reload sessions
+        } else {
+            displayEditErrorMessages(result.errors || ['Error updating session. Please try again.']);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        displayEditErrorMessages(['Network error. Please check your connection and try again.']);
+    } finally {
+        // Reset button state
+        submitButton.textContent = originalText;
+        submitButton.disabled = false;
+    }
+});
+
+function validateEditFormData(data) {
+    const errors = [];
+    
+    // Required fields validation
+    if (!data.school_name || data.school_name.trim().length < 2) {
+        errors.push('School name must be at least 2 characters long');
+    }
+    if (data.school_name && data.school_name.trim().length > 100) {
+        errors.push('School name must be less than 100 characters');
+    }
+    
+    if (!data.session_type || data.session_type.trim().length < 2) {
+        errors.push('Session type must be at least 2 characters long');
+    }
+    if (data.session_type && data.session_type.trim().length > 50) {
+        errors.push('Session type must be less than 50 characters');
+    }
+    
+    if (!data.location || data.location.trim().length < 2) {
+        errors.push('Location must be at least 2 characters long');
+    }
+    if (data.location && data.location.trim().length > 100) {
+        errors.push('Location must be less than 100 characters');
+    }
+    
+    if (!data.activator || data.activator.trim().length < 2) {
+        errors.push('Activator name must be at least 2 characters long');
+    }
+    if (data.activator && data.activator.trim().length > 50) {
+        errors.push('Activator name must be less than 50 characters');
+    }
+    if (data.activator && !/^[a-zA-Z\s\-\.]+$/.test(data.activator.trim())) {
+        errors.push('Activator name can only contain letters, spaces, hyphens, and periods');
+    }
+    
+    if (!data.year_group) {
+        errors.push('Please select a year group');
+    }
+    
+    // Participants validation
+    const maleParticipants = parseInt(data.male_participants);
+    const femaleParticipants = parseInt(data.female_participants);
+    
+    if (isNaN(maleParticipants) || maleParticipants < 0) {
+        errors.push('Male participants must be a valid number (0 or greater)');
+    }
+    if (maleParticipants > 1000) {
+        errors.push('Male participants seems too high (max 1000)');
+    }
+    
+    if (isNaN(femaleParticipants) || femaleParticipants < 0) {
+        errors.push('Female participants must be a valid number (0 or greater)');
+    }
+    if (femaleParticipants > 1000) {
+        errors.push('Female participants seems too high (max 1000)');
+    }
+    
+    if (maleParticipants + femaleParticipants === 0) {
+        errors.push('Total participants must be greater than 0');
+    }
+    if (maleParticipants + femaleParticipants > 2000) {
+        errors.push('Total participants seems too high (max 2000)');
+    }
+    
+    // Session duration validation
+    const duration = parseInt(data.session_duration);
+    if (isNaN(duration) || duration <= 0) {
+        errors.push('Session duration must be greater than 0 minutes');
+    }
+    if (duration > 480) {
+        errors.push('Session duration seems too long (max 8 hours)');
+    }
+    
+    // Date validation
+    if (!data.session_date) {
+        errors.push('Session date is required');
+    } else {
+        const sessionDate = new Date(data.session_date);
+        const today = new Date();
+        today.setHours(23, 59, 59, 999);
+        
+        if (sessionDate > today) {
+            errors.push('Session date cannot be in the future');
+        }
+        if (sessionDate < new Date('2020-01-01')) {
+            errors.push('Session date seems too old');
+        }
+    }
+    
+    // Coordinates validation (optional)
+    if (data.latitude && data.latitude.trim() !== '') {
+        const lat = parseFloat(data.latitude);
+        if (isNaN(lat) || lat < -90 || lat > 90) {
+            errors.push('Latitude must be a valid number between -90 and 90');
+        }
+    }
+    
+    if (data.longitude && data.longitude.trim() !== '') {
+        const lng = parseFloat(data.longitude);
+        if (isNaN(lng) || lng < -180 || lng > 180) {
+            errors.push('Longitude must be a valid number between -180 and 180');
+        }
+    }
+    
+    // Teacher feedback validation (optional)
+    if (data.teacher_feedback && data.teacher_feedback.length > 1000) {
+        errors.push('Teacher feedback must be less than 1000 characters');
+    }
+    
+    return errors;
+}
+
+function displayEditErrorMessages(errors) {
+    // Remove existing error container
+    const existingErrorContainer = document.getElementById('edit-error-container');
+    if (existingErrorContainer) {
+        existingErrorContainer.remove();
+    }
+    
+    // Create error container
+    const errorContainer = document.createElement('div');
+    errorContainer.id = 'edit-error-container';
+    errorContainer.className = 'mb-4 p-4 bg-red-50 border border-red-200 rounded-md';
+    
+    const errorTitle = document.createElement('h4');
+    errorTitle.className = 'text-sm font-medium text-red-800 mb-2';
+    errorTitle.textContent = 'Please fix the following errors:';
+    
+    const errorList = document.createElement('ul');
+    errorList.className = 'text-sm text-red-700 space-y-1';
+    
+    errors.forEach(error => {
+        const listItem = document.createElement('li');
+        listItem.className = 'flex items-center';
+        listItem.innerHTML = `<i class="fas fa-exclamation-circle mr-2"></i>${error}`;
+        errorList.appendChild(listItem);
+    });
+    
+    errorContainer.appendChild(errorTitle);
+    errorContainer.appendChild(errorList);
+    
+    // Insert error container at the top of the form
+    const form = document.getElementById('edit-form');
+    form.insertBefore(errorContainer, form.firstChild);
+    
+    // Scroll to top of modal
+    errorContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function clearEditErrorMessages() {
+    const errorContainer = document.getElementById('edit-error-container');
+    if (errorContainer) {
+        errorContainer.remove();
+    }
+}
+
+// Add real-time validation for edit form fields
+document.getElementById('edit-school-name').addEventListener('input', function(e) {
+    let value = e.target.value;
+    // Remove invalid characters
+    value = value.replace(/[^a-zA-Z0-9\s\-\.'&]/g, '');
+    // Limit length
+    if (value.length > 100) {
+        value = value.substring(0, 100);
+    }
+    e.target.value = value;
+    validateEditTextField(this, 'School name', 2, 100);
+});
+
+document.getElementById('edit-session-type').addEventListener('input', function(e) {
+    let value = e.target.value;
+    // Remove invalid characters
+    value = value.replace(/[^a-zA-Z\s\-\.']/g, '');
+    // Limit length
+    if (value.length > 50) {
+        value = value.substring(0, 50);
+    }
+    e.target.value = value;
+    validateEditTextField(this, 'Session type', 2, 50);
+});
+
+document.getElementById('edit-location').addEventListener('input', function(e) {
+    let value = e.target.value;
+    // Remove invalid characters
+    value = value.replace(/[^a-zA-Z0-9\s\-\.,'/&()]/g, '');
+    // Limit length
+    if (value.length > 100) {
+        value = value.substring(0, 100);
+    }
+    e.target.value = value;
+    validateEditTextField(this, 'Location', 2, 100);
+});
+
+document.getElementById('edit-activator').addEventListener('input', function(e) {
+    let value = e.target.value;
+    // Remove invalid characters (only letters, spaces, hyphens, periods)
+    value = value.replace(/[^a-zA-Z\s\-\.]/g, '');
+    // Limit length
+    if (value.length > 50) {
+        value = value.substring(0, 50);
+    }
+    e.target.value = value;
+    validateEditActivatorField(this);
+});
+
+document.getElementById('edit-male-participants').addEventListener('input', function(e) {
+    let value = e.target.value;
+    // Remove non-numeric characters
+    value = value.replace(/[^0-9]/g, '');
+    // Convert to number and limit
+    if (value !== '') {
+        let num = parseInt(value);
+        if (num > 1000) {
+            value = '1000';
+        }
+    }
+    e.target.value = value;
+    validateEditParticipantsField(this, 'Male participants');
+});
+
+document.getElementById('edit-female-participants').addEventListener('input', function(e) {
+    let value = e.target.value;
+    // Remove non-numeric characters
+    value = value.replace(/[^0-9]/g, '');
+    // Convert to number and limit
+    if (value !== '') {
+        let num = parseInt(value);
+        if (num > 1000) {
+            value = '1000';
+        }
+    }
+    e.target.value = value;
+    validateEditParticipantsField(this, 'Female participants');
+});
+
+document.getElementById('edit-session-duration').addEventListener('input', function(e) {
+    let value = e.target.value;
+    // Remove non-numeric characters
+    value = value.replace(/[^0-9]/g, '');
+    // Convert to number and limit (max 8 hours = 480 minutes)
+    if (value !== '') {
+        let num = parseInt(value);
+        if (num > 480) {
+            value = '480';
+        }
+    }
+    e.target.value = value;
+    validateEditDurationField(this);
+});
+
+document.getElementById('edit-latitude').addEventListener('input', function(e) {
+    let value = e.target.value;
+    // Allow only numbers, decimal point, and minus sign
+    value = value.replace(/[^0-9\.\-]/g, '');
+    
+    // Ensure only one decimal point
+    const parts = value.split('.');
+    if (parts.length > 2) {
+        value = parts[0] + '.' + parts.slice(1).join('');
+    }
+    
+    // Ensure minus sign only at the beginning
+    if (value.indexOf('-') > 0) {
+        value = value.replace(/-/g, '');
+        if (e.target.value.startsWith('-')) {
+            value = '-' + value;
+        }
+    }
+    
+    // Validate range
+    if (value !== '' && value !== '-') {
+        let num = parseFloat(value);
+        if (!isNaN(num)) {
+            if (num > 90) {
+                value = '90';
+            } else if (num < -90) {
+                value = '-90';
+            }
+        }
+    }
+    
+    e.target.value = value;
+    validateEditCoordinateField(this, 'Latitude', -90, 90);
+});
+
+document.getElementById('edit-longitude').addEventListener('input', function(e) {
+    let value = e.target.value;
+    // Allow only numbers, decimal point, and minus sign
+    value = value.replace(/[^0-9\.\-]/g, '');
+    
+    // Ensure only one decimal point
+    const parts = value.split('.');
+    if (parts.length > 2) {
+        value = parts[0] + '.' + parts.slice(1).join('');
+    }
+    
+    // Ensure minus sign only at the beginning
+    if (value.indexOf('-') > 0) {
+        value = value.replace(/-/g, '');
+        if (e.target.value.startsWith('-')) {
+            value = '-' + value;
+        }
+    }
+    
+    // Validate range
+    if (value !== '' && value !== '-') {
+        let num = parseFloat(value);
+        if (!isNaN(num)) {
+            if (num > 180) {
+                value = '180';
+            } else if (num < -180) {
+                value = '-180';
+            }
+        }
+    }
+    
+    e.target.value = value;
+    validateEditCoordinateField(this, 'Longitude', -180, 180);
+});
+
+document.getElementById('edit-teacher-feedback').addEventListener('input', function(e) {
+    let value = e.target.value;
+    // Limit length to 1000 characters
+    if (value.length > 1000) {
+        value = value.substring(0, 1000);
+        e.target.value = value;
+        showEditFieldError(this, 'Teacher feedback must be less than 1000 characters');
+    } else {
+        clearEditFieldError(this);
+    }
+});
+
+document.getElementById('edit-session-date').addEventListener('change', function(e) {
+    const selectedDate = new Date(e.target.value);
+    const today = new Date();
+    today.setHours(23, 59, 59, 999);
+    
+    if (selectedDate > today) {
+        // Reset to today's date
+        e.target.value = new Date().toISOString().split('T')[0];
+        showEditFieldError(this, 'Session date cannot be in the future');
+    } else if (selectedDate < new Date('2020-01-01')) {
+        // Reset to minimum date
+        e.target.value = '2020-01-01';
+        showEditFieldError(this, 'Session date seems too old');
+    } else {
+        clearEditFieldError(this);
+    }
+});
+
+// Add validation helper functions for edit form
+function validateEditTextField(field, fieldName, minLength, maxLength) {
+    const value = field.value.trim();
+    clearEditFieldError(field);
+    
+    if (field.required && value.length < minLength) {
+        showEditFieldError(field, `${fieldName} must be at least ${minLength} characters long`);
+        return false;
+    }
+    if (value.length > maxLength) {
+        showEditFieldError(field, `${fieldName} must be less than ${maxLength} characters`);
+        return false;
+    }
+    return true;
+}
+
+function validateEditActivatorField(field) {
+    const value = field.value.trim();
+    clearEditFieldError(field);
+    
+    if (field.required && value.length < 2) {
+        showEditFieldError(field, 'Activator name must be at least 2 characters long');
+        return false;
+    }
+    if (value.length > 50) {
+        showEditFieldError(field, 'Activator name must be less than 50 characters');
+        return false;
+    }
+    if (value && !/^[a-zA-Z\s\-\.]+$/.test(value)) {
+        showEditFieldError(field, 'Activator name can only contain letters, spaces, hyphens, and periods');
+        return false;
+    }
+    return true;
+}
+
+function validateEditCoordinateField(field, fieldName, min, max) {
+    const value = field.value.trim();
+    clearEditFieldError(field);
+    
+    if (value === '') return true; // Optional field
+    
+    const numValue = parseFloat(value);
+    if (isNaN(numValue) || numValue < min || numValue > max) {
+        showEditFieldError(field, `${fieldName} must be a valid number between ${min} and ${max}`);
+        return false;
+    }
+    return true;
+}
+
+function validateEditDurationField(field) {
+    const value = parseInt(field.value);
+    clearEditFieldError(field);
+    
+    if (isNaN(value) || value <= 0) {
+        showEditFieldError(field, 'Session duration must be greater than 0 minutes');
+        return false;
+    }
+    if (value > 480) {
+        showEditFieldError(field, 'Session duration seems too long (max 8 hours)');
+        return false;
+    }
+    return true;
+}
+
+function showEditFieldError(field, message) {
+    field.classList.add('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
+    field.classList.remove('border-gray-300', 'focus:border-blue-500', 'focus:ring-blue-500');
+    
+    // Create error message element
+    const errorElement = document.createElement('p');
+    errorElement.className = 'text-red-600 text-sm mt-1 edit-field-error';
+    errorElement.textContent = message;
+    
+    // Insert after the field
+    field.parentNode.insertBefore(errorElement, field.nextSibling);
+}
+
+function clearEditFieldError(field) {
+    field.classList.remove('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
+    field.classList.add('border-gray-300', 'focus:border-blue-500', 'focus:ring-blue-500');
+    
+    // Remove error message
+    const errorElement = field.parentNode.querySelector('.edit-field-error');
+    if (errorElement) {
+        errorElement.remove();
+    }
+}
+
+// Event listeners
+document.getElementById('search-input').addEventListener('input', filterSessions);
+document.getElementById('type-filter').addEventListener('change', filterSessions);
+
+// Load sessions when page loads
+document.addEventListener('DOMContentLoaded', loadSessions);
+</script>
+{% endblock %}
