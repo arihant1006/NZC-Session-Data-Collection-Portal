@@ -1,1 +1,1 @@
-# NZC-Awareness-Portal
+# NZC Session Data Collection Portal
